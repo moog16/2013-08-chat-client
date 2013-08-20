@@ -6,15 +6,27 @@
     <link rel="stylesheet" href="css/reset.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="vendor/jquery/jquery-1.9.1.js"></script>
-    <script src="js/setup.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.1/underscore-min.js"></script>
+    <script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+    <script src="js/setup2.js"></script>
   </head>
   <body>
 
     <div id="main">
       <h1>Chat with JSON!</h1>
-      <textarea id="sendMessage"></textarea>
-      <button id="submitMessage" onclick="subMessage()" type="submit">Send</button>
+      <div id="new-message">
+        <form>
+          <textarea id="sendMessage"></textarea>
+          <button id="submitMessage" type="submit">Send</button>
+        </form>
+      </div>
       <br />
+      <div id="roomNames"></div>
+      <br/>
+      <form>
+        <input type="text" id="roomNameInput" value="enter new room name...">
+        <button id="submitRoomName" type="button">Submit room name</button>
+      </form>
       <div id="messageWrapper"></div>
     </div>
 

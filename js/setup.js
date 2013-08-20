@@ -15,10 +15,10 @@ $.ajaxPrefilter(function(settings, _, jqXHR) {
 });
 
 var friendList = {};
-
+var roomList = {'messages': true};
+var urlPath = 'messages';
 
 var subMessage = function() {
-  console.log('this is working');
   var textMessage = $('#sendMessage').val();
 
   console.log(textMessage);
@@ -29,22 +29,22 @@ var subMessage = function() {
     'roomname': 'level8'
   };
 
-  $.ajax('https://api.parse.com/1/classes/messages', {
+  $.ajax('https://api.parse.com/1/classes/'+urlPath, {
     contentType: 'application/json',
     type: 'POST',
     data: JSON.stringify(message),
     success: function() {
       console.log('we sent a message, maybe');
+      updateMessages();
     }
   });
 
-  updateMessages();
 };
 
 var updateMessages = function() {
   var params = encodeURI('order=-createdAt');
 
-  $.ajax('https://api.parse.com/1/classes/messages?'+params, {
+  $.ajax('https://api.parse.com/1/classes/'+ urlPath+'?'+params, {
     contentType: 'application/json',
     success: function(data){
       $('#messageWrapper').html('');
@@ -55,8 +55,8 @@ var updateMessages = function() {
         } else {
           $text = $('<span>').text(data.results[i].text);
         }
-        var $user = $('<a>').text(data.results[i].username + ': ');
-        var $message = $('<div>').append($user).append($text);
+        var $user = $('<a>').text(data.results[i].username);
+        var $message = $('<div>').append($user).append(': ').append($text);
 
         $('#messageWrapper').append($message).append('<br />');
 
@@ -64,6 +64,7 @@ var updateMessages = function() {
     },
     error: function(data) {
       console.log('Ajax request failed');
+      roomList[urlPath] = false;
     }
   });
 };
@@ -79,4 +80,29 @@ $(document).ready( function() {
     }
     updateMessages();
   });
+
+  $('form #submitRoomName').on('click', function() {
+    urlPath = $('#roomNameInput').val();
+    roomList[urlPath] = true;
+    updateMessages();
+
+    setTimeout(function() {
+      $('#roomNames').html('');
+      for(var key in roomList) {
+        if(roomList[key] === true) {
+          $('#roomNames').append('<a>' + key + '</a>').append('<br />');
+        }
+      }
+    }, 700);
+  });
+
+  $('body').on('click', '#roomNames a', function() {
+    urlPath = this.innerHTML;
+    updateMessages();
+  });
+
+  $('#submitMessage').on('click', function() {
+    subMessage();
+  });
 });
+
