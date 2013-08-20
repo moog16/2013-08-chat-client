@@ -14,6 +14,9 @@ $.ajaxPrefilter(function(settings, _, jqXHR) {
   jqXHR.setRequestHeader("X-Parse-REST-API-Key", "QC2F43aSAghM97XidJw8Qiy1NXlpL5LR45rhAVAf");
 });
 
+var friendList = {};
+
+
 var subMessage = function() {
   console.log('this is working');
   var textMessage = $('#sendMessage').val();
@@ -40,24 +43,40 @@ var subMessage = function() {
 
 var updateMessages = function() {
   var params = encodeURI('order=-createdAt');
-  console.log(params);
+
   $.ajax('https://api.parse.com/1/classes/messages?'+params, {
     contentType: 'application/json',
     success: function(data){
       $('#messageWrapper').html('');
-      console.log(data);
       for(var i=0; i < data.results.length; i++) {
-        var $text = data.results[i].text;
-        var $user = data.results[i].username;
-        $('#messageWrapper').append('<a href="" id='+ i+data.results.length +'>  </a><span id="' + i + '"></span><br />');
-        $('#'+i).text($text);
-        $('#'+i+data.results.length).text($user + ':  ');
+        var $test;
+        if(friendList[data.results[i].username] === true) {
+          $text = $('<span>').append($('<b>').text(data.results[i].text));
+        } else {
+          $text = $('<span>').text(data.results[i].text);
+        }
+        var $user = $('<a>').text(data.results[i].username + ': ');
+        var $message = $('<div>').append($user).append($text);
+
+        $('#messageWrapper').append($message).append('<br />');
+
       }
-      console.log(data);
     },
     error: function(data) {
       console.log('Ajax request failed');
     }
   });
 };
-updateMessages();
+
+
+$(document).ready( function() {
+  updateMessages();
+
+  $('body').on('click', '#messageWrapper a', function() {
+    var username = this.innerHTML;
+    if (!friendList[username]) {
+      friendList[username] = true;
+    }
+    updateMessages();
+  });
+});
