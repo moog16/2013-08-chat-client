@@ -15,43 +15,82 @@ $.ajaxPrefilter(function(settings, _, jqXHR) {
 });
 
 var Message = Backbone.Model.extend({
-  url: 'https://api.parse.com/1/classes/messages'
+  initialize: function(data) {
+    this.set('text', data.text);
+    this.set('username', data.username);
+  }
 });
 
 var Messages = Backbone.Collection.extend({
-  model: Message
+  model: Message,
+  url: 'https://api.parse.com/1/classes/messages?order=-createdAt',
+  options: {
+    success: function(collection, response) {
+      _.each(response.results, function(messageObj, index) {
+      });
+    }
+  }
+});
+
+// var NewMessageView = Backbone.View.extend({
+//   events: {
+//     'submit form': 'addMessage'
+//   },
+//   initialize: function() {
+//     this.collection.on('add', this.clearInput, this);
+//   },
+//   addMessage: function(e) {
+//     e.preventDefault();
+//     console.log('msg added');
+//     this.collection.create({ text: this.$('#sendMessage').val() });
+//   },
+//   clearInput: function() {
+//     this.$('#sendMessage').val('');
+//   }
+// });
+
+var MessagesView = Backbone.View.extend({
+  initialize: function() {
+    this.collection.on('add', this.appendMessages, this);
+    this.collection.on('add', this.appendNewMessage, this);
+  },
+  appendMessages: function(message) {
+    var text = message.get('results');
+    var that = this;
+    _.each(text, function(responseObj) {
+      $(that.el).append($('<div/>').append($('<a/>').text(responseObj.username))
+        .append($('<span/>').text(': ' +responseObj.text)));
+    });
+  },
+  appendNewMessage: function() {
+    
+  }
 });
 
 var NewMessageView = Backbone.View.extend({
   events: {
-    'submit form': 'addMessage'
+    'submit form': 'addNewMessage'
   },
   initialize: function() {
     this.collection.on('add', this.clearInput, this);
   },
-  addMessage: function(e) {
-    console.log('adding messsage');
+  addNewMessage: function(e) {
     e.preventDefault();
-    this.collection.create({ text: this.$('textarea').val() });
+    this.collection.create({
+      text: $('#sendMessage').val(),
+      username: window.location.search.split('=')[1]
+    });
   },
   clearInput: function() {
-    this.$('#sendMessage').val('');
-  }
-});
-
-var MessagesView = Backbone.View.extend({
-  initialize: function() {
-    this.collection.on('add', this.appendMessage, this);
-  },
-  appendMessage: function(message) {
-    this.$('#messageWrapper').append('<span>' + message.escape('text')+'</span>');
+    $('#sendMessage').val('');
   }
 });
 
 $(document).ready(function() {
   var messages = new Messages();
-  new NewMessageView({ el: $('#new-message'), collection: messages });
-  new MessagesView({ el: $('#messageWrapper'), collection: messages });
+  messages.fetch(messages.options);
+  new MessagesView({ el: '#messageWrapper', collection: messages });
+  new NewMessageView({ el: '#new-message', collection: messages });
 });
 
 

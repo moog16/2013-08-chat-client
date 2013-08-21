@@ -8,7 +8,8 @@ var Statuses = Backbone.Collection.extend({
 
 var NewStatusView = Backbone.View.extend({
     events: {
-        'submit form': 'addStatus'
+        // 'submit #testID': 'addStatus',
+        'submit #new-status': 'addStatus'
     },
 
     initialize: function() {
