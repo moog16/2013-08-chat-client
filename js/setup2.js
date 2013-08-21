@@ -23,31 +23,14 @@ var Message = Backbone.Model.extend({
 
 var Messages = Backbone.Collection.extend({
   model: Message,
-  url: 'https://api.parse.com/1/classes/messages?order=-createdAt',
-  options: {
-    success: function(collection, response) {
-      _.each(response.results, function(messageObj, index) {
-      });
-    }
-  }
+  url: 'https://api.parse.com/1/classes/messages?order=-createdAt'
+  // options: {
+  //   success: function(collection, response) {
+  //     _.each(response.results, function(messageObj, index) {
+  //     });
+  //   }
+  // }
 });
-
-// var NewMessageView = Backbone.View.extend({
-//   events: {
-//     'submit form': 'addMessage'
-//   },
-//   initialize: function() {
-//     this.collection.on('add', this.clearInput, this);
-//   },
-//   addMessage: function(e) {
-//     e.preventDefault();
-//     console.log('msg added');
-//     this.collection.create({ text: this.$('#sendMessage').val() });
-//   },
-//   clearInput: function() {
-//     this.$('#sendMessage').val('');
-//   }
-// });
 
 var MessagesView = Backbone.View.extend({
   initialize: function() {
@@ -62,8 +45,15 @@ var MessagesView = Backbone.View.extend({
         .append($('<span/>').text(': ' +responseObj.text)));
     });
   },
-  appendNewMessage: function() {
-    
+  appendNewMessage: function(message) {
+    // var that = this.fetch.bind(this.collection);
+    // var init = _.once(that);
+
+    // init();
+    // console.log('asdf');
+    this.collection.fetch({add: false});
+    $(this.el).prepend($('<div/>').append($('<a/>').text(message.get('username')))
+        .append($('<span/>').text(': ' +message.get('text'))));
   }
 });
 
@@ -88,9 +78,14 @@ var NewMessageView = Backbone.View.extend({
 
 $(document).ready(function() {
   var messages = new Messages();
-  messages.fetch(messages.options);
+  //messages.fetch(messages.options);
+  messages.fetch();
   new MessagesView({ el: '#messageWrapper', collection: messages });
   new NewMessageView({ el: '#new-message', collection: messages });
+  // setInterval(function() {
+  //   messages.fetch({add:false});
+  // }, 500);
+  // Backbone.sync('read', messages);
 });
 
 
